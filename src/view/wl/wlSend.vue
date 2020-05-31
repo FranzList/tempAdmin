@@ -42,42 +42,47 @@ export default {
     let _self = this
     return {
       columns: [
+        { title: '商品数量', key: 'productCount', align: 'center' },
         { title: '订单编号', key: 'orderNo', align: 'center' },
         { title: '订单金额', key: 'orderMoney', align: 'center' },
         { title: '创建时间', key: 'createTime', align: 'center' },
-        { title: '操作',
-          key: 'zz',
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('Button', {
-                props: {
-                  type: this.$config.colors.view,
-                  size: 'small'
-                },
-                style: {
-                  'margin-left': '5px'
-                },
-                on: {
-                  click () {
-                    _self.formsTitle = '查看'
-                    _self.openType = 'view'
-                    _self.formsVisible = true
-                    _self.formsData = params.row.orders[0]
-                  }
-                }
-              }, '详情')
+        { title: '支付时间', key: 'productCount', align: 'center' },
+        { title: '支付方式', key: 'paymentText', align: 'center' },
+        { title: '送货地址', key: 'address', align: 'center' },
+        { title: '创建时间', key: 'createTime', align: 'center' },
+        // { title: '操作',
+        //   key: 'zz',
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     return h('div', [
+        //       h('Button', {
+        //         props: {
+        //           type: this.$config.colors.view,
+        //           size: 'small'
+        //         },
+        //         style: {
+        //           'margin-left': '5px'
+        //         },
+        //         on: {
+        //           click () {
+        //             _self.formsTitle = '查看'
+        //             _self.openType = 'view'
+        //             _self.formsVisible = true
+        //             _self.formsData = params.row.orders[0]
+        //           }
+        //         }
+        //       }, '详情')
 
-            ])
-          }
-        }
+        //     ])
+        //   }
+        // }
       ],
       tableData: [],
       //  分页
       pageParams: {
         current: 1,
         size: 10,
-        wlStatus: 3
+        status: 2
       },
       //   分页总数
       pageTotal: 0,
@@ -134,9 +139,9 @@ export default {
       this.pageTotal = Number(res.data.data.total)
     },
     filterData (data) {
-      const typeStaus = ['', '普通商品', '计划商品', '抽奖商品']
+      const typeStaus = ['', '支付宝', '微信', '银联']
       data.forEach(item => {
-        item.typeText = typeStaus[item.type]
+        item.paymentText = typeStaus[item.payment]
       })
       return data
     },

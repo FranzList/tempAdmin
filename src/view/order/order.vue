@@ -1,5 +1,32 @@
 <template>
   <div>
+    <Modal v-model="proVisible" title="返还计划" footer-hide width="1200">
+      <Table size="small" border :columns="proColumns" :data="proTableData">
+        <template slot-scope="{ row }" slot="proType">
+            <span v-if="row.proType === 1">普通商品</span>
+            <span v-if="row.proType === 2">计划商品</span>
+            <span v-if="row.proType === 3">抽奖商品</span>
+        </template>
+        <template slot-scope="{ row }" slot="status">
+            <span v-if="row.status === 1">生产中</span>
+            <span v-if="row.status === 2">已完成</span>
+        </template>
+        <template slot-scope="{ row }" slot="proImage">
+            <img style="width:100px;height:100px" :src="row.proImage"></img>
+        </template>
+        <template slot-scope="{ row }" slot="action">
+            <Button size="small" type="primary" @click="viewSuborders(row)">查看子订单</Button>
+        </template>
+      </Table>
+    </Modal>
+     <Modal v-model="suborderVisible" title="子订单" footer-hide width="1200">
+      <Table height="400" size="small" border :columns="suborderColumns" :data="suborderTableData">   
+        <template slot-scope="{ row }" slot="status">
+            <span v-if="row.status === 0">待返</span>
+            <span v-if="row.status === 1">已返</span>
+        </template>
+      </Table>
+    </Modal>
     <Card>
       <tables
       ref="tables"
@@ -32,7 +59,7 @@
 <script>
 import Tables from '_c/tables'
 import Forms from '_c/forms'
-import { getOrders } from '@/api/order'
+import { getOrders, findOrder } from '@/api/order'
 export default {
   name: 'product',
   components: {
@@ -42,75 +69,68 @@ export default {
   data () {
     let _self = this
     return {
+      proVisible: false,
+      proColumns: [
+        { title: '商品名称', key: 'proName', align: 'center' },
+        { title: '价格', key: 'proPrice', align: 'center' },
+        { title: '购买数量', key: 'proSum', align: 'center' },
+        { title: '返利期数', key: 'profitCount', align: 'center' },
+        { title: '每期返利', key: 'periodicProfit', align: 'center' },
+        { title: '总价', key: 'proMoney', align: 'center' },
+        { title: '商品类型', key: 'proType', align: 'center' },
+        { title: '订单状态', slot: 'status', align: 'center' },
+        { title: '产品图片', slot: 'proImage', align: 'center' },
+        { title: '创建时间', key: 'createTime', align: 'center' },
+        { title: '操作', slot: 'action', align: 'center' }
+      ],
+      proTableData: [],
+      suborderVisible: false,
+      suborderColumns: [
+        { title: '返利', key: 'proProfit', align: 'center' },
+        { title: '生产时间', key: 'proTime', align: 'center' },
+        // { title: '实返时间', key: 'realTime', align: 'center' },
+        { title: '创建时间', key: 'createTime', align: 'center' },
+        { title: '返利状态', slot: 'status', align: 'center' }
+      ],
+      suborderTableData: [],
       columns: [
+        { title: '商品数量', key: 'productCount', align: 'center' },
         { title: '订单编号', key: 'orderNo', align: 'center' },
         { title: '订单金额', key: 'orderMoney', align: 'center' },
-        { title: '创建时间', key: 'createTime', align: 'center' }
-        // { title: '操作',
-        //   key: 'zz',
-        //   align: 'center',
-        //   render: (h, params) => {
-        //     return h('div', [
+        { title: '创建时间', key: 'createTime', align: 'center' },
+        { title: '支付时间', key: 'productCount', align: 'center' },
+        { title: '支付方式', key: 'paymentText', align: 'center' },
+        { title: '送货地址', key: 'address', align: 'center' },
+        { title: '创建时间', key: 'createTime', align: 'center' },
+        { title: '操作',
+          key: 'zz',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
 
-        //       h('Button', {
-        //         props: {
-        //           type: this.$config.colors.view,
-        //           size: 'small'
-        //         },
-        //         style: {
+              h('Button', {
+                props: {
+                  type: this.$config.colors.view,
+                  size: 'small'
+                },
+                style: {
 
-        //         },
-        //         on: {
-        //           click () {
-        //             _self.formsVisible = true
-        //             _self.formsTitle = '查看'
-        //             _self.formsData = params.row
-        //             console.log(_self.formsData)
-        //           }
-        //         }
-        //       }, '查看'),
-        //       h('Button', {
-        //         props: {
-        //           type: this.$config.colors.edit,
-        //           size: 'small'
-        //         },
-        //         style: {
-        //         },
-        //         on: {
-        //           click () {
-
-        //           }
-        //         }
-        //       }, '编辑'),
-        //       h('Button', {
-        //         props: {
-        //           type: this.$config.colors.other1,
-        //           size: 'small'
-        //         },
-        //         style: {
-
-        //         },
-        //         on: {
-        //           click () {
-        //           }
-        //         }
-        //       }, '上架'),
-        //       h('Button', {
-        //         props: {
-        //           type: this.$config.colors.delete,
-        //           size: 'small'
-        //         },
-        //         style: {
-
-        //         },
-        //         on: {
-        //           click () {
-        //           }
-        //         }
-        //       }, '删除')
-        //     ])
-        //   }
-        // }
+                },
+                on: {
+                  click () {
+                    _self.proVisible = true
+                    findOrder({
+                      orderId: 229,
+                      orderProId: 25
+                    }).then(res => {
+                      _self.proTableData = res.data.data
+                    })
+                  }
+                }
+              }, '返还计划')
+            ])
+          }
+        }
       ],
       tableData: [],
       //  分页
@@ -123,7 +143,15 @@ export default {
       // 搜索
       queryParams: {},
       searchColumns: [
-        { label: '订单编号', key: 'orderNo' }
+        { label: '订单编号', key: 'orderNo' },
+        { label: '返利状态',
+          key: 'profitOrder',
+          type: 'select',
+          selectData: [
+            { label: '未返利', value: 'false' },
+            { label: '已返利', value: 'true' }
+          ] }
+
       ],
       // 动态表单数据
       formsTitle: '',
@@ -153,6 +181,11 @@ export default {
     }
   },
   methods: {
+    viewSuborders (row) {
+      this.suborderVisible = true
+      this.suborderTableData = row.proSubOrders
+      this.suborderTableData = this.suborderTableData.concat(row.proSubOrders)
+    },
     onAdd () {
       this.formsVisible = true
       this.openType = 'add'
@@ -164,6 +197,10 @@ export default {
     },
     onSearch (event) {
       this.queryParams = event
+      if (this.queryParams.profitOrder) {
+        this.queryParams.profitOrder = this.queryParams.profitOrder.includes('true')
+      }
+
       this.pageParams.current = 1
       this.getTableData(this.pageParams, this.queryParams)
     },
@@ -176,9 +213,9 @@ export default {
       this.pageTotal = Number(res.data.data.total)
     },
     filterData (data) {
-      const typeStaus = ['', '普通商品', '计划商品', '抽奖商品']
+      const typeStaus = ['', '支付宝', '微信', '银联']
       data.forEach(item => {
-        item.typeText = typeStaus[item.type]
+        item.paymentText = typeStaus[item.payment]
       })
       return data
     },

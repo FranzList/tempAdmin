@@ -1,9 +1,22 @@
 <template>
   <div>
     <div  style="display:flex;align-items:center;margin-bottom:20px">
-      <div v-for="item in searchColumns" :key="item.key" style="display:flex;align-items:center">
+      <div  v-for="item in searchColumns" :key="item.key" style="display:flex;align-items:center">
         <span>{{item.label}}</span>
-      <Input clearable v-model="searchData[item.key]" style="margin:0 10px;width:100px"/>
+        <Select
+          v-if="item.type == 'select'"
+          clearable
+          v-model="searchData[item.key]"
+          style="margin:0 10px;width:200px"
+        >
+          <Option
+            v-for="item in item.selectData"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></Option>
+        </Select>
+        <Input v-else clearable v-model="searchData[item.key]" style="margin:0 10px;width:100px" />
       </div>
       <Button v-if="searchable" type="primary" @click="searchEvent">搜索</Button>
       <Button v-if="addable" type="primary" style="margin-left:10px" @click="$emit('on-add')">添加</Button>
@@ -39,21 +52,29 @@
       <slot name="footer" slot="footer"></slot>
       <slot name="loading" slot="loading"></slot>
     </Table>
-    <Page v-if="pageable"
-        ref="page"
-        style="margin-top:10px"
-        show-total
-        align="center"
-        :total="pageTotal"
-        :current="currentPage"
-        @on-change="changePage"
-      ></Page>
+    <Page
+      v-if="pageable"
+      ref="page"
+      style="margin-top:10px"
+      show-total
+      align="center"
+      :total="pageTotal"
+      :current="currentPage"
+      @on-change="changePage"
+    ></Page>
     <div v-if="searchable && searchPlace === 'bottom'" class="search-con search-con-top">
       <Select v-model="searchKey" class="search-col">
-        <Option v-for="item in columns" v-if="item.key !== 'handle'" :value="item.key" :key="`search-col-${item.key}`">{{ item.title }}</Option>
+        <Option
+          v-for="item in columns"
+          v-if="item.key !== 'handle'"
+          :value="item.key"
+          :key="`search-col-${item.key}`"
+        >{{ item.title }}</Option>
       </Select>
-      <Input placeholder="输入关键字搜索" class="search-input" v-model="searchValue"/>
-      <Button class="search-btn" type="primary"><Icon type="search"/>&nbsp;&nbsp;搜索</Button>
+      <Input placeholder="输入关键字搜索" class="search-input" v-model="searchValue" />
+      <Button class="search-btn" type="primary">
+        <Icon type="search" />&nbsp;&nbsp;搜索
+      </Button>
     </div>
     <a id="hrefToExportTable" style="display: none;width: 0px;height: 0px;"></a>
   </div>
@@ -212,21 +233,26 @@ export default {
             editable: this.editable
           },
           on: {
-            'input': val => {
+            input: val => {
               this.edittingText = val
             },
-            'on-start-edit': (params) => {
+            'on-start-edit': params => {
               this.edittingCellId = `editting-${params.index}-${params.column.key}`
               this.$emit('on-start-edit', params)
             },
-            'on-cancel-edit': (params) => {
+            'on-cancel-edit': params => {
               this.edittingCellId = ''
               this.$emit('on-cancel-edit', params)
             },
-            'on-save-edit': (params) => {
-              this.value[params.row.initRowIndex][params.column.key] = this.edittingText
+            'on-save-edit': params => {
+              this.value[params.row.initRowIndex][
+                params.column.key
+              ] = this.edittingText
               this.$emit('input', this.value)
-              this.$emit('on-save-edit', Object.assign(params, { value: this.edittingText }))
+              this.$emit(
+                'on-save-edit',
+                Object.assign(params, { value: this.edittingText })
+              )
               this.edittingCellId = ''
             }
           }
@@ -243,7 +269,10 @@ export default {
       let btns = item.button ? [].concat(insideBtns, item.button) : insideBtns
       item.render = (h, params) => {
         params.tableData = this.value
-        return h('div', btns.map(item => item(h, params, this)))
+        return h(
+          'div',
+          btns.map(item => item(h, params, this))
+        )
       }
       return item
     },
@@ -256,13 +285,20 @@ export default {
       })
     },
     setDefaultSearchKey () {
-      this.searchKey = this.columns[0].key !== 'handle' ? this.columns[0].key : (this.columns.length > 1 ? this.columns[1].key : '')
+      this.searchKey =
+        this.columns[0].key !== 'handle'
+          ? this.columns[0].key
+          : this.columns.length > 1
+            ? this.columns[1].key
+            : ''
     },
     handleClear (e) {
       if (e.target.value === '') this.insideTableData = this.value
     },
     handleSearch () {
-      this.insideTableData = this.value.filter(item => item[this.searchKey].indexOf(this.searchValue) > -1)
+      this.insideTableData = this.value.filter(
+        item => item[this.searchKey].indexOf(this.searchValue) > -1
+      )
     },
     handleTableData () {
       this.insideTableData = this.value.map((item, index) => {

@@ -43,11 +43,15 @@ export default {
     return {
       columns: [
         { title: '商品名称', key: 'proName', align: 'center ' },
+        { title: '商品类型', key: 'proType', align: 'center ' },
         { title: '用户手机号', key: 'phone', align: 'center ' },
-        { title: '返利天数', key: 'proDays', align: 'center ' },
         { title: '商品价格', key: 'proMoney', align: 'center ' },
-        { title: '商品返利', key: 'proSumProfit', align: 'center ' },
-        { title: '已售数量', key: 'proSum', align: 'center ' }
+        { title: '商品返利', key: 'periodicProfit', align: 'center ' },
+        { title: '返利单位', key: 'profitType', align: 'center ' },
+        { title: '返利期数', key: 'profitCount', align: 'center' },
+        { title: '生产状态', key: 'status', align: 'center' },
+        { title: '已售数量', key: 'proSum', align: 'center ' },
+        { title: '创建时间', key: 'createTime', align: 'center ' }
         // { title: '操作',
         //   key: 'zz',
         //   align: 'center',
@@ -118,7 +122,8 @@ export default {
       //  分页
       pageParams: {
         current: 1,
-        size: 10
+        size: 10,
+        status: 1
       },
       //   分页总数
       pageTotal: 0,
@@ -132,10 +137,10 @@ export default {
       formsData: {},
       formsVisible: false,
       formsColumns: [
-        { label: '商品名称', key: 'name' },
-        { label: '返利天数', key: 'days' },
+        { label: '商品名称', key: 'name' },     
         { label: '商品价格', key: 'price' },
         { label: '商品返利', key: 'profit' },
+        { label: '返利期数', key: 'profitCount' },
         { label: '已售数量', key: 'soldNum' },
         { label: '产品类型',
           key: 'type',

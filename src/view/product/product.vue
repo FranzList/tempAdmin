@@ -25,15 +25,15 @@
     @on-formsSubmit="onFormsSubmit"
     @on-formsCancel="onFormsCancel"
     :openType="openType"
+    @on-selectChange="onSelectChange"
     ></forms>
   </div>
 </template>
-
 <script>
 import Tables from '_c/tables'
 import Forms from '_c/forms'
 import { getProducts, addProduct, editProduct, onProduct, offProduct, detailProduct } from '@/api/product'
-import { isNullObject } from '@/libs/tools'
+import { isNullObject, deletePropertyFromObject } from '@/libs/tools'
 export default {
   name: 'product',
   components: {
@@ -48,6 +48,9 @@ export default {
         { title: '商品价格', key: 'price', align: 'center' },
         { title: '返利期数', key: 'profitCount', align: 'center' },
         { title: '商品类型', key: 'typeText', align: 'center' },
+        { title: '库存', key: 'stock', align: 'center' },
+        { title: '批发价', key: 'tradePrice', align: 'center' },
+        { title: '采购价', key: 'purchasePrice', align: 'center' },
         { title: '操作',
           key: 'zz',
           align: 'center',
@@ -68,6 +71,17 @@ export default {
                       _self.formsData = res.data.data
                       _self.formsVisible = true
                       _self.formsTitle = '查看'
+                      if (params.row.type !== 2) {
+                        const deleteKeys = ['profitCount', 'periodicProfit', 'profitType']
+                        _self.formsColumns.forEach(item => {
+                          deleteKeys.forEach(key => {
+                            if (item.key === key) {
+                              // const index = this.formsColumns.indexOf(item)
+                              item.hidden = true
+                            }
+                          })
+                        })
+                      }
                       _self.openType = 'view'
                     })
                   }
@@ -135,7 +149,15 @@ export default {
       // 搜索
       queryParams: {},
       searchColumns: [
-        { label: '商品名称', key: 'name' }
+        { label: '商品名称', key: 'name' },
+        { label: '商品名称',
+          key: 'type',
+          type: 'select',
+          selectData: [
+            { label: '普通商品', value: 1 },
+            { label: '计划商品', value: 2 },
+            { label: '抽奖商品', value: 3 }
+          ] }
       ],
       // 动态表单数据
       formsTitle: '',
@@ -144,14 +166,27 @@ export default {
       formsColumns: [
         { label: '商品名称', key: 'name' },
         { label: '商品价格', key: 'price' },
+        { label: '库存', key: 'stock' },
+        { label: '批发价', key: 'tradePrice' },
+        { label: '采购价', key: 'purchasePrice' },
         { label: '返利期数', key: 'profitCount' },
+        { label: '每期返利', key: 'periodicProfit' },
+        { label: '返利周期单位',
+          key: 'profitType',
+          type: 'select',
+          selectData: [
+            { label: '天', value: '天' },
+            { label: '月', value: '月' },
+            { label: '周', value: '周' }
+          ]
+        },
         { label: '产品类型',
           key: 'type',
           type: 'select',
           selectData: [
-            { label: '热销', value: 1 },
-            { label: '爆款', value: 2 },
-            { label: '抢单', value: 3 }
+            { label: '普通商品', value: 1 },
+            { label: '计划商品', value: 2 },
+            { label: '抽奖商品', value: 3 }
           ]
         },
         { label: '商品图片', key: 'image', type: 'upload' },
@@ -162,6 +197,29 @@ export default {
     }
   },
   methods: {
+    // 选择事件--用来动态删除表单元素
+    onSelectChange (e) {
+      // this.formsColumns = [
+      //   // { label: '每期返利', key: 'periodicProfit' },
+      // ]
+
+      if (e.key === 'type' && e.value === 2) {
+        // 要删除的表单
+        const deleteKeys = ['profitCount', 'periodicProfit', 'profitType']
+        this.formsColumns.forEach(item => {
+          deleteKeys.forEach(key => {
+            if (item.key === key) {
+              // const index = this.formsColumns.indexOf(item)
+              item.hidden = true
+            }
+          })
+        })
+      } else {
+        this.formsColumns.forEach(item => {
+          item.hidden = false
+        })
+      }
+    },
     onAdd () {
       this.formsVisible = true
       this.openType = 'add'
@@ -183,6 +241,9 @@ export default {
       const res = await getProducts(pager, querys)
       this.tableData = this.filterData(res.data.data.records)
       this.pageTotal = Number(res.data.data.total)
+      this.formsColumns.forEach(item => {
+        item.hidden = false
+      })
     },
     filterData (data) {
       const typeStaus = ['', '普通商品', '计划商品', '抽奖商品']
@@ -196,31 +257,36 @@ export default {
     },
     // 表单提交
     async onFormsSubmit (event) {
-      let validateInfo = {
-        name: '请输入商品名称',
-        price: '请输入商品价格',
-        profitCount: '请输入返利期数',
-        intro: '请上传详情图片',
-        type: '请输入商品类型',
-        image: '请上传商品图片'
+      let data = { ...event }
+      if (data.type != 2) {
+        deletePropertyFromObject(data, ['profitType', 'periodicProfit', 'profitCount'])
       }
-      let data = {}
-      let validateArr = []
-      Object.keys(validateInfo).forEach(key => {
-        data[key] = event[key]
-        validateArr.push(key)
-      })
-      let message = ''
-      Object.keys(data).forEach(key => {
-        if (!data[key]) {
-          message = validateInfo[key]
-        }
-      })
-      const isNull = isNullObject(data, validateArr)
-      if (!isNull) {
-        this.$Message.error(message)
-        return
-      }
+
+      // let validateInfo = {
+      //   name: '请输入商品名称',
+      //   price: '请输入商品价格',
+      //   profitCount: '请输入返利期数',
+      //   intro: '请上传详情图片',
+      //   type: '请输入商品类型',
+      //   image: '请上传商品图片'
+      // }
+      // let data = {}
+      // let validateArr = []
+      // Object.keys(validateInfo).forEach(key => {
+      //   data[key] = event[key]
+      //   validateArr.push(key)
+      // })
+      // let message = ''
+      // Object.keys(data).forEach(key => {
+      //   if (!data[key]) {
+      //     message = validateInfo[key]
+      //   }
+      // })
+      // const isNull = isNullObject(data, validateArr)
+      // if (!isNull) {
+      //   this.$Message.error(message)
+      //   return
+      // }
       // deletePropertyFromObject(event,)
       if (this.formsTitle.includes('编辑')) {
         data.id = event.id

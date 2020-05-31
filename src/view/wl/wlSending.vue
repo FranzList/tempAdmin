@@ -31,7 +31,7 @@
 <script>
 import Tables from '_c/tables'
 import Forms from '_c/forms'
-import { getOrders, shippedOrder } from '@/api/order'
+import { getOrders, shippingOrder } from '@/api/order'
 export default {
   name: 'product',
   components: {
@@ -42,13 +42,21 @@ export default {
     let _self = this
     return {
       columns: [
+        { title: '商品数量', key: 'productCount', align: 'center' },
         { title: '订单编号', key: 'orderNo', align: 'center' },
         { title: '订单金额', key: 'orderMoney', align: 'center' },
+        { title: '创建时间', key: 'createTime', align: 'center' },
+        { title: '支付时间', key: 'productCount', align: 'center' },
+        { title: '支付方式', key: 'paymentText', align: 'center' },
+        { title: '送货地址', key: 'address', align: 'center' },
         { title: '创建时间', key: 'createTime', align: 'center' },
         { title: '操作',
           key: 'zz',
           align: 'center',
           render: (h, params) => {
+            let orderInfo = {
+              orderId: params.row.id
+            }
             return h('div', [
 
               h('Button', {
@@ -62,11 +70,43 @@ export default {
                 on: {
                   click () {
                     const config = {
-                      title: '提示',
+                      title: '发货信息填写',
                       content: '确定要发货吗？',
                       loading: true,
+                      render: (h) => {
+                        return h('div', [
+                          h('Input', {
+                            props: {
+                              placeholder: '请输入快递单号',
+                              type: 'number'
+
+                            },
+                            on: {
+                              input: (val) => {
+                                orderInfo.shippingId = val
+                              }
+                            }
+                          }),
+                          h('Input', {
+                            props: {
+                              placeholder: '请输入快递公司'
+
+                            },
+                            style: {
+                              'margin-top': '10px'
+                            },
+                            on: {
+                              input: (val) => {
+                                orderInfo.company = val
+                              }
+                            }
+                          })
+                        ]
+                        )
+                      },
                       onOk: () => {
-                        shippedOrder({ id: params.row.id }).then(res => {
+                        console.log(orderInfo)
+                        shippingOrder(orderInfo).then(res => {
                           _self.$Modal.remove()
                           _self.$Message.info(res.data.message)
                           _self.getTableData(_self.pageParams, _self.queryParams)
@@ -75,28 +115,29 @@ export default {
                       onCancel: () => {
                         console.log('cacel')
                       }
+
                     }
                     _self.$Modal.confirm(config)
                   }
                 }
-              }, '确认发货'),
-              h('Button', {
-                props: {
-                  type: this.$config.colors.view,
-                  size: 'small'
-                },
-                style: {
-                  'margin-left': '5px'
-                },
-                on: {
-                  click () {
-                    _self.formsTitle = '查看'
-                    _self.openType = 'view'
-                    _self.formsVisible = true
-                    _self.formsData = params.row.orders[0]
-                  }
-                }
-              }, '详情')
+              }, '确认发货')
+              // h('Button', {
+              //   props: {
+              //     type: this.$config.colors.view,
+              //     size: 'small'
+              //   },
+              //   style: {
+              //     'margin-left': '5px'
+              //   },
+              //   on: {
+              //     click () {
+              //       _self.formsTitle = '查看'
+              //       _self.openType = 'view'
+              //       _self.formsVisible = true
+              //       _self.formsData = params.row.orders[0]
+              //     }
+              //   }
+              // }, '详情')
 
             ])
           }
@@ -107,7 +148,7 @@ export default {
       pageParams: {
         current: 1,
         size: 10,
-        wlStatus: 2
+        status: 1
       },
       //   分页总数
       pageTotal: 0,
@@ -141,6 +182,7 @@ export default {
     }
   },
   methods: {
+    
     onAdd () {
       this.formsVisible = true
       this.openType = 'add'
@@ -164,9 +206,9 @@ export default {
       this.pageTotal = Number(res.data.data.total)
     },
     filterData (data) {
-      const typeStaus = ['', '普通商品', '计划商品', '抽奖商品']
+      const typeStaus = ['', '支付宝', '微信', '银联']
       data.forEach(item => {
-        item.typeText = typeStaus[item.type]
+        item.paymentText = typeStaus[item.payment]
       })
       return data
     },

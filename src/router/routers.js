@@ -46,7 +46,8 @@ export default [
           notCache: false,
           icon: 'md-home'
         },
-        component: () => import('@/view/single-page/home')
+        // component: () => import('@/view/single-page/home')
+        component: () => import('@/view/user/user.vue')
       }
     ]
   },
@@ -120,34 +121,81 @@ export default [
     ]
   },
   {
-    path: '/billManager',
-    name: 'billManager',
+    path: '/agentManager',
+    name: 'agentManager',
     meta: {
       icon: 'md-person',
-      title: '账单管理'
+      title: '代理管理'
     },
     component: Main,
     children: [
       {
-        path: '/billCheck1',
-        name: 'billCheck1',
+        path: '/agent',
+        name: 'agent',
         meta: {
-          title: '充值',
+          title: '代理等级',
           icon: 'md-person'
         },
-        component: () => import('@/view/bill/check1.vue')
+        component: () => import('@/view/agent/agent.vue')
       },
       {
-        path: '/billCheck2',
-        name: 'billCheck2',
+        path: '/amount',
+        name: 'amount',
         meta: {
-          title: '提现',
+          title: '代理商账户',
           icon: 'md-person'
         },
-        component: () => import('@/view/bill/check2.vue')
+        component: () => import('@/view/agent/amount.vue')
+      },
+      {
+        path: '/agentCharge',
+        name: 'agentCharge',
+        meta: {
+          title: '代理商充值',
+          icon: 'md-person'
+        },
+        component: () => import('@/view/agent/charge.vue')
+      },
+      {
+        path: '/agentWithdraw',
+        name: 'agentWithdraw',
+        meta: {
+          title: '代理商提现',
+          icon: 'md-person'
+        },
+        component: () => import('@/view/agent/withdraw.vue')
       }
     ]
   },
+  // {
+  //   path: '/billManager',
+  //   name: 'billManager',
+  //   meta: {
+  //     icon: 'md-person',
+  //     title: '账单管理'
+  //   },
+  //   component: Main,
+  //   children: [
+  //     {
+  //       path: '/billCheck1',
+  //       name: 'billCheck1',
+  //       meta: {
+  //         title: '充值',
+  //         icon: 'md-person'
+  //       },
+  //       component: () => import('@/view/bill/check1.vue')
+  //     },
+  //     {
+  //       path: '/billCheck2',
+  //       name: 'billCheck2',
+  //       meta: {
+  //         title: '提现',
+  //         icon: 'md-person'
+  //       },
+  //       component: () => import('@/view/bill/check2.vue')
+  //     }
+  //   ]
+  // },
   {
     path: '/wlManager',
     name: 'wlManager',
@@ -158,19 +206,10 @@ export default [
     component: Main,
     children: [
       {
-        path: '/wlWaitsend',
-        name: 'wlWaitsend',
-        meta: {
-          title: '备货中',
-          icon: 'md-person'
-        },
-        component: () => import('@/view/wl/wlWaitsend.vue')
-      },
-      {
         path: '/wlSending',
         name: 'wlSending',
         meta: {
-          title: '发货中',
+          title: '待发货',
           icon: 'md-person'
         },
         component: () => import('@/view/wl/wlSending.vue')
@@ -199,11 +238,69 @@ export default [
         path: '/production',
         name: 'production',
         meta: {
-          title: '生产管理',
+          title: '生产中',
           icon: 'md-person'
         },
         component: () => import('@/view/production/production.vue')
+      },
+      {
+        path: '/completed',
+        name: 'completed',
+        meta: {
+          title: '生产完成',
+          icon: 'md-person'
+        },
+        component: () => import('@/view/production/completed.vue')
       }
+    ]
+  },
+  {
+    path: '/lottoManager',
+    name: 'lottoManager',
+    meta: {
+      icon: 'md-person',
+      title: '抽奖管理'
+    },
+    component: Main,
+    children: [
+      {
+        path: '/lottos',
+        name: 'lottos',
+        meta: {
+          title: '抽奖商品',
+          icon: 'md-person'
+        },
+        component: () => import('@/view/product/lotto.vue')
+      }
+    ]
+  },
+  {
+    path: '/platformManager',
+    name: 'platformManager',
+    meta: {
+      icon: 'md-person',
+      title: '平台管理'
+    },
+    component: Main,
+    children: [
+      {
+        path: '/platformOptions',
+        name: 'platformOptions',
+        meta: {
+          title: '参数配置',
+          icon: 'md-person'
+        },
+        component: () => import('@/view/platform/platform.vue')
+      }
+      // {
+      //   path: '/compansationPlat',
+      //   name: 'compansationPlat',
+      //   meta: {
+      //     title: '偿返计划',
+      //     icon: 'md-person'
+      //   },
+      //   component: () => import('@/view/production/completed.vue')
+      // }
     ]
   },
   {
@@ -243,26 +340,6 @@ export default [
           icon: 'md-person'
         },
         component: () => import('@/view/rookie/rookie.vue')
-      }
-    ]
-  },
-  {
-    path: '/agentManager',
-    name: 'agentManager',
-    meta: {
-      icon: 'md-person',
-      title: '代理'
-    },
-    component: Main,
-    children: [
-      {
-        path: '/agent',
-        name: 'agent',
-        meta: {
-          title: '代理',
-          icon: 'md-person'
-        },
-        component: () => import('@/view/user/user.vue')
       }
     ]
   },

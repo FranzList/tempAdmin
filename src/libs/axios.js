@@ -61,14 +61,13 @@ class HttpRequest {
     instance.interceptors.response.use(res => {
       this.destroy(url)
       const { data, status } = res
-      if (!res.data.success) {
+      if (res.data.code === 40003) {
         Message.error({
           content: res.data.message,
           onClose: () => {
-            console.log(res)
-            // store.dispatch('handleLogOut').then(() => {
-            //   router.push({ name: 'login' })
-            // })
+            store.dispatch('handleLogOut').then(() => {
+              router.push({ name: 'login' })
+            })
           }
         })
       }

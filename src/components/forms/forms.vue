@@ -15,6 +15,7 @@
         :prop="item.key"
         :key="index"
         :label="item.label"
+        :style="{'display':item.hidden?'none':''}"
       >
         <!-- checkBox -->
         <CheckboxGroup v-if="item.type== 'checkboxGroup'" v-model="formsData[item.key]">
@@ -40,7 +41,7 @@
               :multiple="item.multiple"
               clearable
               :max-tag-count="1"
-              @on-change="item.multiple?onSelectChange_multiple(item.key,$event,item.selectData):onSelectChange"
+              @on-change="item.multiple?onSelectChange_multiple(item.key,$event,item.selectData):onSelectChange(item.key,$event,item)"
               :disabled="openType == 'view'"
             >
               <Option
@@ -48,6 +49,7 @@
                 :value="select.value"
                 :label="select.label"
                 :key="select.value"
+
               ></Option>
             </Select>
           </Col>
@@ -78,7 +80,11 @@
 
         <!-- input -->
         <!-- 输入格式的限制 -->
-        <Input v-else :type="item.inputType||'text'" :readonly="openType == 'view'" v-model="formsData[item.key]" />
+        <Input v-else
+         :type="item.inputType||'text'"
+         :readonly="openType == 'view'"
+         v-model="formsData[item.key]"
+         />
       </FormItem>
     </Form>
     <div  slot="footer">
@@ -132,8 +138,9 @@ export default {
       const allVals = options.map(item => { return item.value })
       this.selfFormData[key] = value ? allVals : []
     },
-    onSelectChange (key, value) {
+    onSelectChange (key, value, item) {
       this.selfFormData[key] = value
+      this.$emit('on-selectChange', { key: key, value: value })
     },
     getFromWidth () {
       const arr = [...this.formsColumns]
